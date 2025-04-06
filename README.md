@@ -21,7 +21,7 @@ Cette application web permet de prédire le risque cardiaque à partir de donné
 
 ```bash
 git clone <url-du-dépôt>
-cd Hypertension-risk-model/AppWeb
+cd /AppWeb
 ```
 
 2. Créer un environnement virtuel et l'activer:
