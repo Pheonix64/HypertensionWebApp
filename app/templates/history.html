@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des Prédictions - Risque Cardiaque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Prédiction de Risque Cardiaque</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/history">Historique</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Historique des Prédictions</h3>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table id="historyTable" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Âge</th>
+                                <th>Sexe</th>
+                                <th>Fumeur</th>
+                                <th>Diabète</th>
+                                <th>Pression Sys.</th>
+                                <th>Pression Dia.</th>
+                                <th>IMC</th>
+                                <th>Prédiction</th>
+                                <th>Probabilité</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history %}
+                            <tr>
+                                <td>{{ item.date_prediction }}</td>
+                                <td>{{ item.age }}</td>
+                                <td>{{ "Masculin" if item.male == 1 else "Féminin" }}</td>
+                                <td>{{ "Oui" if item.currentSmoker == 1 else "Non" }}</td>
+                                <td>{{ "Oui" if item.diabetes == 1 else "Non" }}</td>
+                                <td>{{ item.sysBP }}</td>
+                                <td>{{ item.diaBP }}</td>
+                                <td>{{ item.BMI }}</td>
+                                <td>
+                                    <span class="badge {% if item.risk_prediction == 'Risque élevé' %}bg-danger{% else %}bg-success{% endif %}">
+                                        {{ item.risk_prediction }}
+                                    </span>
+                                </td>
+                                <td>{{ "%.1f"|format(item.probability * 100) }}%</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailModal{{ item.id }}">
+                                        Voir
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Modal de détails -->
+                            <div class="modal fade" id="detailModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header {% if item.risk_prediction == 'Risque élevé' %}bg-danger{% else %}bg-success{% endif %} text-white">
+                                            <h5 class="modal-title">Détails de la Prédiction #{{ item.id }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h5>Informations du Patient</h5>
+                                                    <ul class="list-group mb-3">
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Âge:</span> <strong>{{ item.age }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Sexe:</span> <strong>{{ "Masculin" if item.male == 1 else "Féminin" }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Fumeur:</span> <strong>{{ "Oui" if item.currentSmoker == 1 else "Non" }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Cigarettes/jour:</span> <strong>{{ item.cigsPerDay }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Médicaments pression:</span> <strong>{{ "Oui" if item.BPMeds == 1 else "Non" }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Diabète:</span> <strong>{{ "Oui" if item.diabetes == 1 else "Non" }}</strong>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h5>Mesures Cliniques</h5>
+                                                    <ul class="list-group mb-3">
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Cholestérol total:</span> <strong>{{ item.totChol }} mg/dL</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Pression systolique:</span> <strong>{{ item.sysBP }} mmHg</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Pression diastolique:</span> <strong>{{ item.diaBP }} mmHg</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>IMC:</span> <strong>{{ item.BMI }}</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Fréquence cardiaque:</span> <strong>{{ item.heartRate }} bpm</strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span>Glucose:</span> <strong>{{ item.glucose }} mg/dL</strong>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-12 text-center">
+                                                    <h4>Résultat de la Prédiction</h4>
+                                                    <div class="alert {% if item.risk_prediction == 'Risque élevé' %}alert-danger{% else %}alert-success{% endif %} mb-3">
+                                                        <h5 class="mb-0">{{ item.risk_prediction }}</h5>
+                                                    </div>
+                                                    <div class="progress mb-3" style="height: 30px;">
+                                                        <div class="progress-bar {% if item.risk_prediction == 'Risque élevé' %}bg-danger{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ item.probability * 100 }}%;">
+                                                            {{ "%.1f"|format(item.probability * 100) }}%
+                                                        </div>
+                                                    </div>
+                                                    <p class="small text-muted">Date de prédiction: {{ item.date_prediction }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">Aucune prédiction n'a encore été enregistrée. <a href="/" class="alert-link">Faire une prédiction</a></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">Application de Prédiction de Risque Cardiaque &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="{{ url_for('static', path='/js/history.js') }}"></script>
+</body>
+</html> 

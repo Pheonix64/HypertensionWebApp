@@ -1,0 +1,15 @@
+Nom de la variable	Description
+index	Identifiant unique de chaque individu (index du dataset)
+male	Sexe de l’individu (1 = homme, 0 = femme)
+age	Âge de la personne (en années)
+currentSmoker	Fumeur actuel (1 = oui, 0 = non)
+cigsPerDay	Nombre moyen de cigarettes fumées par jour
+BPMeds	Médication pour la pression artérielle (1 = oui, 0 = non)
+diabetes	Diabète diagnostiqué (1 = oui, 0 = non)
+totChol	Taux de cholestérol total (mg/dL)
+sysBP	Pression artérielle systolique (mmHg)
+diaBP	Pression artérielle diastolique (mmHg)
+BMI	Indice de masse corporelle (kg/m²)
+heartRate	Fréquence cardiaque (battements par minute)
+glucose	Taux de glucose dans le sang (mg/dL)
+Risk	Variable cible : risque d’événement cardiovasculaire (1 = oui, 0 = non)
